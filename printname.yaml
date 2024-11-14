@@ -1,0 +1,27 @@
+trigger: none #push, main
+pr: none #push, no main
+
+
+schedules:
+ - cron: "0 9 * * 1"  # Every Monday at 09:00 UTC
+   displayName: "Weekly Monday Build"
+   branches:
+     include:
+       - main
+   always: true
+
+pool:
+ vmImage: 'ubuntu-latest'
+ 
+variables:
+ - group: Bors
+
+jobs:
+ - job: printmyownname
+   timeoutInMinutes: 50
+   cancelTimeoutInMinutes: 10
+   steps:
+    - script: |
+   		  echo $(bors_peter)
+ 	    displayName: 'print name'
+
