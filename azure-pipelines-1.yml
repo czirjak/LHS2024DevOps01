@@ -30,3 +30,16 @@ steps:
     docker tag nginx:latest codehunterseducation/szentpeteri:20241114
     docker push codehunterseducation/szentpeteri:20241114
   displayName: 'push own nginx'
+
+- script: |
+    docker run -d -p 1234:80 codehunterseducation/szentpeteri:20241114
+  displayName: 'start container'
+
+- script: |
+    sleep 10
+    curl -X GET http://localhost:1234
+  displayName: 'run integration test'
+
+- script: |
+    docker ps
+  displayName: 'check containers run'
