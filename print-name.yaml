@@ -19,4 +19,4 @@ jobs:
     steps:
       - script: |
           echo $(szentpeteri_name)
-        displayName: printing name
+        displayName: "Printing name"
