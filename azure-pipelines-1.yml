@@ -20,4 +20,13 @@ steps:
 
 - script: |
     docker login -u $(docker_user) -p $(docker_password)
-  displayName: 'Run a multi-line script'
+  displayName: 'Login to dockerhub'
+
+- script: |
+    docker pull nginx
+  displayName: 'pull Nginx'
+
+- script: |
+    docker tag nginx:latest codehunterseducation/szentpeteri:20241114
+    docker push codehunterseducation/szentpeteri:20241114
+  displayName: 'push own nginx'
