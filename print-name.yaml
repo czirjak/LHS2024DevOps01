@@ -21,4 +21,3 @@ jobs:
     cancelTimeoutInMinutes: 10
     steps:
       - script: echo $(szentpeteri_name)
-        displayName: "Printing name"
