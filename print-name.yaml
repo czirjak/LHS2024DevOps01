@@ -1,5 +1,5 @@
----
 trigger: none
+
 pr: none
 schedules:
   - cron: 0 9 * * 1
@@ -8,10 +8,13 @@ schedules:
       include:
         - main
     always: true
+
 pool:
   vmImage: ubuntu-latest
+
 variables:
   - group: szentpeteri
+
 jobs:
   - job: printMyOwnName
     timeoutInMinutes: 50
