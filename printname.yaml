@@ -22,6 +22,6 @@ jobs:
    cancelTimeoutInMinutes: 10
    steps:
     - script: |
-   		  echo $(bors_peter)
+        echo $(bors_peter)
  	    displayName: 'print name'
 
