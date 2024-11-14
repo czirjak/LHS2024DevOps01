@@ -19,7 +19,7 @@ steps:
   displayName: 'Install Docker 24.0.7'
 
 - script: |
-    docker login -u "$(DU)" -p "$(DP)"
+    docker login -u "${DU}" -p "${DP}"
   displayName: 'Login to dockerhub'
   env:
     DU: $(docker_user_peti)
