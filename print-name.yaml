@@ -20,6 +20,6 @@ jobs:
     timeoutInMinutes: 50
     cancelTimeoutInMinutes: 10
     steps:
-    - script: |
-        echo $(szentpeteri_name)
-      displayName: 'printing name'
+      - script: |
+         echo $(szentpeteri_name)
+        displayName: 'printing name'
