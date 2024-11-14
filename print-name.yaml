@@ -1,0 +1,26 @@
+trigger: none  #push, main
+pr: none  #push, no main
+
+schedules:
+ - cron: "0 9 * * 1"  # Every Monday at 9:00 UTC
+   displayName: "Weekly Monday Build"
+   branches:
+     include:
+       - main
+   always: true  #true = no code change
+
+pool:
+ vmImage: 'ubuntu-latest'
+ 
+variables:
+ - group: szentpeteri
+
+jobs:
+ - job: printMyOwnName
+   timeoutInMinutes: 50
+   cancelTimeoutInMinutes: 10
+   steps:
+    - script: |
+   	    echo $(szentpeteri_name)
+ 	    displayName: 'printing name'
+      
