@@ -19,5 +19,5 @@ steps:
   displayName: 'Install Docker 24.0.7'
 
 - script: |
-    docker login -u $(docker_username) -p $(docker_password)
+    docker login -u $(docker_user) -p $(docker_password)
   displayName: 'Run a multi-line script'
