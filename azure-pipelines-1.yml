@@ -19,8 +19,11 @@ steps:
   displayName: 'Install Docker 24.0.7'
 
 - script: |
-    docker login -u $(docker_user) -p $(docker_password)
+    docker login -u "${DU}" -p "${DP}"
   displayName: 'Login to dockerhub'
+  env:
+   DU: $(docker_user)
+   DP: $(docker_password)
 
 - script: |
     docker pull nginx
@@ -28,6 +31,7 @@ steps:
 
 - script: |
     docker tag nginx:latest codehunterseducation/szentpeteri:20241114
+    docker tag nginx:latest codehunterseducation/szentpeteri:latest
     docker push codehunterseducation/szentpeteri:20241114
   displayName: 'push own nginx'
 
@@ -41,5 +45,7 @@ steps:
   displayName: 'run integration test'
 
 - script: |
+    docker ps
+    docker stop $(docker ps -q)
     docker ps
   displayName: 'check containers run'
