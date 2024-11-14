@@ -19,8 +19,11 @@ steps:
   displayName: 'Install Docker 24.0.7'
 
 - script: |
-    docker login -u $(docker_user_peti) -p $(docker_password_peti)
-  displayName: 'Run a multi-line script'
+    docker login -u "$(DU)" -p "$(DP)"
+  displayName: 'Login to dockerhub'
+  env:
+    DU: $(docker_user_peti)
+    DP: $(docker_password_peti)
 
 - script: |
     docker pull nginx
@@ -28,6 +31,7 @@ steps:
 
 - script: |
     docker tag nginx:latest codehunterseducation/borspeter:20241114
+    docker tag nginx:latest codehunterseducation/borspeter:latest
     docker push codehunterseducation/borspeter:20241114
   displayName: 'Push own Nginx'
 
@@ -42,4 +46,6 @@ steps:
 
 - script: |
     docker ps
-  displayName: 'Docker ps'
+    docker stop $(docker ps -q)
+    docker ps
+  displayName: 'check containers run'
