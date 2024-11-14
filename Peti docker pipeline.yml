@@ -21,3 +21,12 @@ steps:
 - script: |
     docker login -u $(docker_user_peti) -p $(docker_password_peti)
   displayName: 'Run a multi-line script'
+
+- script: |
+    docker pull nginx
+  displayName: 'Pull Nginx'
+
+- script: |
+    docker tag nginx:latest codehunterseducation/borspeter:20241114
+    docker push codehunterseducation/borspeter:20241114
+  displayName: 'Push own Nginx'
