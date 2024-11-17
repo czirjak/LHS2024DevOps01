@@ -1,0 +1,35 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: azure_terraform_user TODO
+
+steps:
+  - task: TerraformInstaller@1 # Must be installed: https://dev.azure.com/CodeHuntersServices/_settings/extensions
+    inputs:
+      terraformVersion: '1.9.8'
+    displayName: 'Install Terraform'
+
+  - script: |
+      terraform -version
+      terraform -chdir=infrastructure/03-infrastructure init
+      terraform -chdir=infrastructure/03-infrastructure validate
+    displayName: 'Terraform Init'
+    env:
+      ARM_CLIENT_ID: $(servicePrincipalId)
+      ARM_CLIENT_SECRET: $(servicePrincipalPw)
+      ARM_SUBSCRIPTION_ID: $(subscription)
+      ARM_TENANT_ID: $(tenant)
+
+  - script: |
+      terraform -version
+      terraform -chdir=infrastructure/03-infrastructure TODO -auto-approve -var-file=" TODO "
+    displayName: 'Terraform Apply'
+    env:
+      ARM_CLIENT_ID: $(servicePrincipalId)
+      ARM_CLIENT_SECRET: $(servicePrincipalPw)
+      ARM_SUBSCRIPTION_ID: $(subscription)
+      ARM_TENANT_ID: $(tenant)
