@@ -1,0 +1,146 @@
+trigger:
+  branches:
+    exclude:
+      - ch*
+      - NOJIRA*
+      - nojira*
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: dev-pipeline-configurations
+  - group: docker-hub-variables
+  - name: currentDate
+    value: $[ format('{0:yyyy}.{0:MM}.{0:dd}', pipeline.startTime) ]
+  - name: sourceBranch
+    value: $[replace(variables['Build.SourceBranch'], 'refs/heads/', '')]
+
+jobs:
+  - job: CiBuildOfEducationPortal
+    timeoutInMinutes: 50
+    cancelTimeoutInMinutes: 10
+    steps:
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(knownHosts)
+          sshPublicKey: $(publicKey)
+          sshKeySecureFile: 'dev_ssh_private_key'
+        displayName: 'Install SSH'
+
+      - task: JavaToolInstaller@0
+        inputs:
+          versionSpec: '21'
+          jdkArchitectureOption: 'x64'
+          jdkSourceOption: 'PreInstalled'
+        displayName: 'Install Java 21'
+
+      - task: DockerInstaller@0
+        inputs:
+          dockerVersion: '24.0.7'
+        displayName: 'Install Docker 24.0.7'
+
+      - task: FlutterInstall@0
+        inputs:
+          mode: 'auto'
+          channel: 'stable'
+          version: 'custom'
+          customVersion: '3.16.4'
+        displayName: 'Install Flutter 3.16.4'
+
+      - script: |
+          ./gradlew clean --info
+        displayName: 'Cleaning Everything'
+
+      - script: |
+          ./gradlew buildUi --info
+        displayName: 'Building UI'
+        env:
+          BUILD_UI: true
+          FLUTTER_PATH: $(FlutterToolPath)/flutter
+
+      - script: |
+          ./gradlew :codehunters-education-portal:test --tests hu.codehunters.educationportal.RegularTestSuite --info
+        displayName: 'Running Regular Tests'
+        env:
+          EDU_BARION_KEY: $(eduBarionKey)
+          EDU_EMAIL_PASSWORD: $(eduEmailPassword)
+          EDU_DB_PASSWORD: $(eduDbPassword)
+          BUILD_UI: true
+          FLUTTER_PATH: $(FlutterToolPath)/flutter
+          EDU_LINKEDIN_USERNAME: $(eduLinkedInUsername)
+          EDU_LINKEDIN_PASSWORD: $(eduLinkedInPassword)
+          EDU_DB_NAME: EducationPortalDbForPipeline
+          EDU_OAUTH2_GOOGLE_CLIENT_ID: $(eduOauth2GoogleClientId)
+          EDU_OAUTH2_GOOGLE_CLIENT_SECRET: $(eduOauth2GoogleClientSecret)
+          EDU_SERVICE_ACCOUNT_GOOGLE_CREDENTIALS: $(eduServiceAccountGoogleCredentials)
+
+      - script: |
+          ./gradlew :codehunters-education-portal:build -x :codehunters-education-portal:test --info
+        displayName: 'Creating Jar'
+
+      - script: |
+          ./gradlew jibDockerBuild --info
+        displayName: 'Creating Docker Image'
+
+      - script: |
+          docker images | grep education-portal
+          docker compose -f ./cicd/docker-compose/bdd-docker-compose.yml up -d
+        displayName: 'Starting the Service'
+        env:
+          EDU_BARION_KEY: $(eduBarionKey)
+          EDU_EMAIL_PASSWORD: $(eduEmailPassword)
+          EDU_GOOGLE_CLIENT_SECRET: $(eduGoogleClientSecret)
+          EDU_DB_PASSWORD: $(eduDbPassword)
+          EDU_LINKEDIN_USERNAME: $(eduLinkedInUsername)
+          EDU_LINKEDIN_PASSWORD: $(eduLinkedInPassword)
+          EDU_DB_NAME: EducationPortalDbForPipeline
+          EDU_OAUTH2_GOOGLE_CLIENT_ID: $(eduOauth2GoogleClientId)
+          EDU_OAUTH2_GOOGLE_CLIENT_SECRET: $(eduOauth2GoogleClientSecret)
+          EDU_SERVICE_ACCOUNT_GOOGLE_CREDENTIALS: $(eduServiceAccountGoogleCredentials)
+
+      - script: |
+          sleep 15
+          dockerId=$(docker ps | grep "education-portal" | awk '{print $1}')
+          docker exec "$dockerId" ls /app/resources
+        displayName: 'Checking the Frontend inside the Container'
+
+      - script: |
+          sleep 15
+          ./gradlew :codehunters-education-portal-e2e-tests:clean :codehunters-education-portal-e2e-tests:test --info
+        displayName: 'Running BDD'
+        env:
+          EDU_SERVICE_ACCOUNT_GOOGLE_CREDENTIALS: $(eduServiceAccountGoogleCredentials)
+
+      - script: |
+          sleep 5
+          docker compose -f ./cicd/docker-compose/bdd-docker-compose.yml down
+        displayName: 'Stopping the Service'
+        condition: always()
+
+      - script: |
+          echo "Pushing new docker image ..."
+          tag="education-portal-$(currentDate)-$(git rev-parse --short HEAD)"
+          echo "Tag: $tag"
+          docker tag codehunterskft/codehunters-apps:education-portal-latest codehunterskft/codehunters-apps:$tag || exit 1
+          docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" || exit 1
+          docker push codehunterskft/codehunters-apps:$tag || exit 1
+        displayName: 'Push Docker Images'
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+        env:
+          DOCKER_USERNAME: $(dockerhubUsername)
+          DOCKER_PASSWORD: $(dockerhubPassword)
+
+      - script: |
+          echo "Pushing new files ..."
+          git config --global --add url."git@github.com:".insteadOf "https://github.com/"
+          git config --global user.email "azurepipelines@codehunters.hu"
+          git config --global user.name "Azure CI"
+          
+          git checkout $(sourceBranch)
+          git pull $(sourceBranch)
+          git add --all
+          git commit -m"[skip ci]"
+          git push origin HEAD:refs/heads/$(sourceBranch)
+        displayName: 'Push New Files'
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))

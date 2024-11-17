@@ -1,0 +1,65 @@
+pr: none
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: PipelineTrigger
+      source: "EP [BUILD]"
+      trigger:
+        branches:
+          include:
+            - master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: dev-pipeline-git-configurations
+  - group: dev-machine
+  - name: sourceBranch
+    value: $[replace(variables['Build.SourceBranch'], 'refs/heads/', '')]
+
+steps:
+
+  - task: InstallSSHKey@0
+    inputs:
+      knownHostsEntry: $(knownHosts)
+      sshPublicKey: $(publicKey)
+      sshKeySecureFile: 'dev_ssh_private_key'
+    displayName: 'Install SSH'
+
+  - script: |
+      git config --global --add url."git@github.com:".insteadOf "https://github.com/"
+      git config --global user.email "azurepipelines@codehunters.hu"
+      git config --global user.name "Azure CI"
+      
+      git fetch
+      git checkout $(sourceBranch)
+      git pull origin $(sourceBranch)
+    displayName: 'Using the Latest Branch'
+
+  - script: |
+      echo "Deploy To Prod ..."
+      ssh -o StrictHostKeyChecking=no -p $PORT -l $USER $IP_ADDRESS << EOF
+        set -e
+      
+        docker login
+        mkdir -p ~/docker-compose/education-portal
+        cd ~/docker-compose/education-portal
+        docker-compose down || true
+      EOF
+      scp -P $PORT ./cicd/docker-compose/dev-docker-compose.yml $USER@$IP_ADDRESS:~/docker-compose/education-portal/docker-compose.yml
+      ssh -o StrictHostKeyChecking=no -p $PORT -l $USER $IP_ADDRESS << EOF
+        set -e
+      
+        cd ~/docker-compose/education-portal
+        docker-compose up -d
+        docker ps
+      EOF
+    displayName: 'Deploy To Dev'
+    env:
+      USER: $(devUsername)
+      IP_ADDRESS: $(devMachine)
+      PORT: $(devSshPort)
+
+
