@@ -5,7 +5,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: azure_terraform_user TODO
+  - group: azure_terraform_user #TODO create a variable group with: servicePrincipalId, servicePrincipalPw, subscription, tenant
 
 steps:
   - task: TerraformInstaller@1 # Must be installed: https://dev.azure.com/CodeHuntersServices/_settings/extensions
@@ -26,7 +26,7 @@ steps:
 
   - script: |
       terraform -version
-      terraform -chdir=infrastructure/03-infrastructure TODO -auto-approve -var-file=" TODO "
+      terraform -chdir=infrastructure/03-infrastructure apply -auto-approve -var-file=" TODO "
     displayName: 'Terraform Apply'
     env:
       ARM_CLIENT_ID: $(servicePrincipalId)
