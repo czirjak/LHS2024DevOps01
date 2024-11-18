@@ -6,14 +6,14 @@ schedules:
     displayName: DailyBuild
     branches:
       include:
-        - TODO
+        - main
     always: true
 
 pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: azure_terraform_user TODO
+  - group: azure_terraform_user
 
 steps:
   - task: TerraformInstaller@1 # Must be installed: https://dev.azure.com/CodeHuntersServices/_settings/extensions
@@ -23,8 +23,8 @@ steps:
 
   - script: |
       terraform -version
-      terraform -chdir=infrastructure/03-infrastructure TODO
-      terraform -chdir=infrastructure/03-infrastructure TODO
+      terraform -chdir=infrastructure/03-infrastructure init
+      terraform -chdir=infrastructure/03-infrastructure validate
     displayName: 'Terraform Init'
     env:
       ARM_CLIENT_ID: $(servicePrincipalId)
