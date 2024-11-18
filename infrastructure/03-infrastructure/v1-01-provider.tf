@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = " TODO "
+      version = "=4.10.0"
     }
 
     azuread = {
@@ -13,15 +13,15 @@ terraform {
 }
 
 provider "azurerm" {
-  subscription_id = " TODO "
+  subscription_id = "d3a0a5e1-2b5c-4607-af1e-67614f701658"
 
   features {
     resource_group {
       prevent_deletion_if_contains_resources = false
     }
     key_vault {
-      purge_soft_delete_on_destroy    = TODO
-      recover_soft_deleted_key_vaults = TODO
+      purge_soft_delete_on_destroy    = true
+      recover_soft_deleted_key_vaults = true
     }
   }
 }
