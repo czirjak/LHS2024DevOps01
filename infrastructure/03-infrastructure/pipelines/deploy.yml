@@ -26,7 +26,7 @@ steps:
 
   - script: |
       terraform -version
-      terraform -chdir=infrastructure/03-infrastructure apply -auto-approve -var-file=" TODO "
+      terraform -chdir=infrastructure/03-infrastructure apply -auto-approve -var-file="v1-00-configuration.tfvars"
     displayName: 'Terraform Apply'
     env:
       ARM_CLIENT_ID: $(servicePrincipalId)
