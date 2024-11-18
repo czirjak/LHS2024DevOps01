@@ -1,0 +1,10 @@
+version: '3.3'
+services:
+  mynginx:
+    image: codehunterseducation/borspeter:latest
+    ports:
+      - "1234:80"
+    networks:
+      - "peti"
+networks:
+  peti: {}
