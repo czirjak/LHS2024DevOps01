@@ -37,7 +37,7 @@ steps:
 
 - script: |
     # docker run -d -p 1234:80 codehunterseducation/borspeter:20241114
-    docker-compose up -d 
+    docker compose up -d 
   displayName: 'Start container'
 
 - script: |
@@ -48,6 +48,6 @@ steps:
 - script: |
     docker ps
     # docker stop $(docker ps -q)
-    docker-compose down
+    docker compose down
     docker ps
   displayName: 'check containers run'
