@@ -36,7 +36,7 @@ resource "azurerm_network_security_group" "codehunters_private_nsg" {
     priority                      = 1000
     protocol                      = "Tcp"
     destination_address_prefix    = "*"
-    destination_port_ranges       = [ " TODO " ]
+    destination_port_ranges       = ["22", "80", "443", "8080"]
     source_port_range             = "*"
     source_address_prefix         = azurerm_subnet.public_subnet.address_prefixes
   }
