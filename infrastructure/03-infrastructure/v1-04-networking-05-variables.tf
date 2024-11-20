@@ -7,5 +7,5 @@ variable "public_subnet" {
 variable "private_subnet" {
   description   = "Private subnet CIDR"
   type          = string
-  default       = " TODO "
+  default       = "10.0.2.0/24"
 }
