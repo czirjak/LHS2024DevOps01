@@ -10,7 +10,7 @@ resource "azurerm_key_vault" "codehunters_key_vault" {
   sku_name = "standard"
 
   access_policy {
-    object_id = " TODO " #czirjak
+    object_id = var.training_group_id
     tenant_id = data.azurerm_client_config.client.tenant_id
 
     secret_permissions = [
@@ -26,7 +26,8 @@ resource "azurerm_key_vault" "codehunters_key_vault" {
     object_id    = azurerm_kubernetes_cluster.codehunters_aks_cluster.key_vault_secrets_provider[0].secret_identity[0].object_id
 
     secret_permissions = [
-      " TODO "
+      "Get",
+      "List"
     ]
   }
 }
