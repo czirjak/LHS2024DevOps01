@@ -12,9 +12,9 @@ resource "azurerm_kubernetes_cluster" "codehunters_aks_cluster" {
     max_count       = 5
     max_pods        = 30 #30 is the minimum
 
-    auto_scaling_enabled    = TODO
+    auto_scaling_enabled    = true
     vnet_subnet_id          = azurerm_subnet.private_subnet.id
-    node_public_ip_enabled  = TODO
+    node_public_ip_enabled  = false
   }
 
   identity { # Managed Identity 1
