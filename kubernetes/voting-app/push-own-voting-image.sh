@@ -1,6 +1,6 @@
 #!/bin/sh
 
-git clone https://github.com/Azure-Samples/azure-voting-app-redis.git
+git clone https://github.com/Azure-Samples/azure-voting-app-redis.git azure-voting-app-redis
 cd azure-voting-app-redis/azure-vote
 
 docker build -t azure-vote-front:v1 .
